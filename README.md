@@ -1,55 +1,49 @@
 Install under Ubuntu 11.10
 ==========================
 
-Install Python Poker Network
-----------------------------
+Basic System Setup
+------------------
 
-Project depends on python-poker-network project. Since this is ugly "glue it 
-together" type of project, we will install python-poker-network from 
-repositories and then link certain files to our project files.
+Required software:
 
-First of all make sure MySQL server installed first:
+* GIT
+* MySQL Server 5.x
+* Python 2.7
+* Apache Web Server 2.x
+* Memcached
+* Build tools
+* Python libraries
 
-    sudo apt-get install mysql-server
+First install all required software:
 
-Start by installing python-poker-network:
-
-    sudo apt-get install python-poker-network
-
-Install bitcoind from David Armstrong repository:
-
-    sudo add-apt-repository ppa:stretch/bitcoin
-    sudo apt-get update
-    sudo apt-get install bitcoin
+    apt-get install mysql-server git apache2 memcached build-essential python-twisted \
+                    python-mysqldb python-simplejson python-memcache python-libxml2 \
+                    python-libxslt1
 
 Our implementation of python-poker-network software uses /dev/random. Check it
-if it produce a lot of data by default (cat /dev/random) - you need 1-5 Kb/s 
+if it produce a lot of data by default (cat /dev/random) - you need 1-5 Kb/s
 minumum. If this do not happen you need to install rng-tools:
 
-    sudo apt-get install rng-tools
+    apt-get install rng-tools
 
 And configure it to use initial data from /dev/urandom. To do this edit file
 /etc/default/rng-tools and insert following line at the end of the file:
 
-    HRNGDEVICE=/dev/urandom 
+    HRNGDEVICE=/dev/urandom
 
 Restart rng-tools by:
 
-    sudo /etc/init.d/rng-tools restart
-
-Install Apache web server:
-
-    sudo apt-get install apache2
+    service rng-tools restart
 
 Create new virtual host config file:
 
-    sudo vim /etc/apache2/sites-available/room.conf 
+    vim /etc/apache2/sites-available/room.conf
 
 With similar configuration:
 
     <VirtualHost *:80>
       ServerName room
-    
+
       <Proxy *>
         Order deny,allow
         Allow from all
@@ -60,24 +54,64 @@ With similar configuration:
 
 Enable new settings:
 
-    sudo a2ensite room.conf 
-    sudo a2enmod proxy proxy_http
-    sudo /etc/init.d/apache2 restart
+    a2ensite room.conf
+    a2enmod proxy proxy_http
+    service apache2 restart
 
-Install Memcached:
+Install Python Poker Network Software
+-------------------------------------
 
-    sudo apt-get install memcached
+1. Install `reflogging`
 
-Install GIT and build tools
+    git clone https://github.com/betco/reflogging.git
+    cd reflogging
+    ./setup.py install
+    cd ..
 
-    sudo apt-get install git build-essential
+2. Install `pokerengine`
+
+    git clone https://github.com/betco/pokerengine.git
+    cd pokerengine
+    ./setup.py install
+    cd ..
+
+3. Install `pokerdistutils`
+
+    git clone https://github.com/betco/pokerdistutils.git
+    cd pokerdistutils
+    ./setup.py install
+    cd ..
+
+4. Install `pokerpackets`
+
+    git clone https://github.com/betco/pokerpackets.git
+    cd pokerpackets
+    ./setup.py install
+    cd ..
+
+5. Install `python-pokereval`
+
+    apt-get install python-pypoker-eval
+
+6. Install `python-poker-network`
+
+    git clone https://github.com/betco/pokernetwork.git
+    cd pokernetwork
+
+There edit default.json (your probably need to change root_user only there) and run:
+
+    python setup.py configure -b
+
+This will generate bunch of config files. Review these, to make sure everything is sane. Then install it with:
+
+    ./setup.py install
 
 Install and configure Room
 --------------------------
 
 Install Module::Install from Ubuntu repositories:
 
-    sudo apt-get install libmodule-install-perl
+    apt-get install libmodule-install-perl
 
 
 Install Catalyst and Catalyst::Devel and other libs from Ubuntu repositories:
